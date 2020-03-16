@@ -1,11 +1,11 @@
 // 专门处理token的 读写和删除
 const USER_TOKEN = 'wan-wu-jie-dai-ma'
 
-// 设置
+// 设置(添加)
 export function setUser (user) {
   window.localStorage.setItem(USER_TOKEN, JSON.stringify(user))// 后面只能是字符串
 }
-// 获取
+// 获取-读取
 export function getUser () {
   // 后面只能是字符串
   // JSON.parse里面是空的会报错 我们判断下
