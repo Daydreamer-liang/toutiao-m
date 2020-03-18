@@ -19,6 +19,7 @@ const instance = axios.create({
     return data ? JSONBig.parse(data) : {}
   }]
 })
+
 // 2.拦截器 ----------------作用：统一注入token，不用访问每个页面的时候 都获取一次
 // token的注入是在请求之前 ，在请求拦截器
 instance.interceptors.request.use(function (config) {
