@@ -35,12 +35,14 @@
 </template>
 
 <script>
+import { login } from '@/api/user'
+import { mapMutations } from 'vuex'
 export default {
   data () {
     return {
       loginForm: {
-        mobile: '',
-        code: ''
+        mobile: '17720022477',
+        code: '246810'
       },
       // 此对象专门放置消息
       errorMessage: {
@@ -52,6 +54,7 @@ export default {
     }
   },
   methods: {
+    ...mapMutations(['updateUser']),
     // 定义检查手机号方法
     checkMobile () {
       //  获取手机号 判断 是否为空  满足手机号的格式
@@ -85,11 +88,27 @@ export default {
       return true
     },
     // 登录校验
-    login () {
+    async login () {
       //  校验手机号和验证码
-      if (this.checkMobile() && this.checkCode()) {
-        // 如果两个检查都是true 就表示通过 了校验
-        console.log('校验通过')
+      const validateMobile = this.checkMobile()
+      const validateCode = this.checkCode()
+      // if (this.checkMobile() && this.checkCode()) 之所以不这么写 ，是因为页面初始化，验证码不校验，所以
+      // 前面都先执行一遍校验的代码，在判断
+      if (validateMobile && validateCode) {
+        //   同步
+        // console.log(1)
+        try {
+          const result = await login(this.loginForm)
+          this.updateUser({ user: result }) // 相当于更新当前的token 和 refresh_token
+          // 1 判断是否有需要跳转的页面 如果有 就跳转 如果没有 不用管 直接跳到主页
+          const { redirectUrl } = this.$route.query // query查询参数 也就是 ?后边的参数表
+          // redirectUrl有值的话 跳到该地址 没值的话 跳到 主页
+          this.$router.push(redirectUrl || '/') // 短路表达式
+        } catch (error) {
+          //   this.$notify({ message: '用户名或者验证码错误', duration: 800 })
+          // utils/Plugin 是我们一些常用的函数 $notify 被我们封装 为$gnotify
+          this.$gnotify({ message: '用户名或者验证码错误' })
+        }
       }
     }
   }
