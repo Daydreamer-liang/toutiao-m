@@ -15,19 +15,19 @@
             <!-- 放置文章内容 -->
             <!-- 3个图 -->
             <div class="article_item">
-              <h3 class="van-ellipsis">天上天下，唯我独尊。世界，很大，我就是想去看看</h3>
-              <div class="img_box">
-                <van-image class="w33" fit="cover" src="https://img.yzcdn.cn/vant/cat.jpeg" />
-                <van-image class="w33" fit="cover" src="https://img.yzcdn.cn/vant/cat.jpeg" />
-                <van-image class="w33" fit="cover" src="https://img.yzcdn.cn/vant/cat.jpeg" />
+              <h3 class="van-ellipsis">{{item.title}}</h3>
+              <div class="img_box" v-if="item.cover.type ===3">
+                <van-image class="w33" fit="cover" :src="item.cover.images[0]" />
+                <van-image class="w33" fit="cover" :src="item.cover.images[1]" />
+                <van-image class="w33" fit="cover" :src="item.cover.images[2]" />
               </div>
-              <!-- <div class="img_box">
-                <van-image class="w100" fit="cover" src="https://img.yzcdn.cn/vant/cat.jpeg" />
-              </div>-->
+              <div class="img_box" v-if="item.cover.type ===1">
+                <van-image class="w100" fit="cover" :src="item.cover.images[0]" />
+              </div>
               <div class="info_box">
-                <span>你像一阵风</span>
-                <span>8评论</span>
-                <span>10分钟前</span>
+                <span>{{ item.aut_name }}</span>
+                <span>{{ item.comm_count }}评论</span>
+                <span>{{ item.pubdate }}</span>
                 <span class="close">
                   <van-icon name="cross"></van-icon>
                 </span>
@@ -90,7 +90,7 @@ export default {
         channel_id: this.channel_id,
         timestamp: this.timestamp || Date.now()
       })
-      this.articles.push(data.results) // 文章内容的数据
+      this.articles.push(...data.results) // 文章内容的数据
       this.upLoading = false // 关闭加载
       //   将历史时间戳 给timestamp 保存
       // 判断有历史时间戳
