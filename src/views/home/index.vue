@@ -4,14 +4,14 @@
     <van-tabs>
       <!-- 内部需要放置子 标签  title值为当前显示的内容-->
       <!-- van-tab是vant组件的样式  -->
-      <van-tab :title="`标签${item}`" v-for="item in 10" :key="item">
+      <van-tab :title="item.name" v-for="item in channels" :key="item.id">
         <!-- 生成若干个单元格 -->
         <!-- 这里为什么叫scroll-wrapper  因为样式中对它进行了设置 -->
         <!-- <div class='scroll-wrapper'>
               <van-cell-group>
                 <van-cell title="标题" value="内容" :key="item" v-for="item in 20"></van-cell>
               </van-cell-group>
-        </div> -->
+        </div>-->
         <ArticleList></ArticleList>
       </van-tab>
     </van-tabs>
@@ -25,9 +25,26 @@
 
 <script>
 import ArticleList from './components/article-list'
+import { getMyChannels } from '@/api/channels'
 export default {
+  data () {
+    return {
+      channels: [] // 频道数据
+    }
+  },
   components: {
     ArticleList
+  },
+  methods: {
+    async getMyChannels () {
+      const data = await getMyChannels()
+      //   console.log(data)
+
+      this.channels = data.channels
+    }
+  },
+  created () {
+    this.getMyChannels()
   }
 }
 </script>
