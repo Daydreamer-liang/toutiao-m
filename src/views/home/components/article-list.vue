@@ -102,12 +102,34 @@ export default {
         this.finished = true
       }
     },
-    onRefresh () {
+    // 下拉刷新--传最新的时间戳  永远拿最新的数据 ，今日头条就这样
+    async onRefresh () {
       // 下拉刷新整个页面数据
-      const arr = Array.from(Array(2), (value, index) => '追加' + index)
-      this.articles.unshift(...arr)
-      // 手动关闭正在加载的状态
+      //   const arr = Array.from(Array(2), (value, index) => '追加' + index)
+      //   this.articles.unshift(...arr)
+      //   // 手动关闭正在加载的状态
+      //   this.downLoading = false
+      // 加载数据
+      const data = await getArticles({
+        //   发送请求，给参数：频道ID，时间戳
+        channel_id: this.channel_id,
+        timestamp: Date.now() // 这里不一样
+      })
+      // 手动的关闭 下拉刷新的状态
       this.downLoading = false
+      //   是否有新的数据，有就覆盖，没有就告诉
+      if (data.results.length) {
+        this.articles = data.results // 将原先数据全部覆盖了
+        // 也就是说还有数据 打开刷新开关，让他能继续刷新 ，并保存历史时间戳
+        if (data.pre_timestamp) {
+          this.finished = true
+          this.timestamp = data.pre_timestamp
+        }
+        this.successText = `更新了${data.results.length}条数据`
+      } else {
+        //   如果没有数据
+        this.successText = '当前已经是最新了'
+      }
     }
   }
 }
