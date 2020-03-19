@@ -8,5 +8,13 @@ export default {
     // 此函数是提示错误信息
     Vue.prototype.$gnotify = (params) => Vue.prototype.$notify({ duration: 800, ...params }) // 小伎俩
     // 给Vue的原型属性赋值一个函数 自定义一个函数名
+    // 休眠函数
+    Vue.prototype.$sleep = sleep
   }
+}
+// 休眠函数-不让用户刷新太快
+function sleep (time = 500) {
+  return new Promise(function (resolve, reject) {
+    setInterval(() => resolve(), time)
+  })
 }

@@ -83,6 +83,8 @@ export default {
       //     this.upLoading = false
       //     this.successtext = '刷新成功了哦'
       //   }
+      // 强制等待
+      await this.$sleep()
       // 文章列表数据加载
       //   时间戳简单判断，历史时间戳为空就给现在的时间戳，
       const data = await getArticles({
@@ -104,6 +106,7 @@ export default {
     },
     // 下拉刷新--传最新的时间戳  永远拿最新的数据 ，今日头条就这样
     async onRefresh () {
+      await this.$sleep()// 控制，认为控制等待刷新的时间
       // 下拉刷新整个页面数据
       //   const arr = Array.from(Array(2), (value, index) => '追加' + index)
       //   this.articles.unshift(...arr)
