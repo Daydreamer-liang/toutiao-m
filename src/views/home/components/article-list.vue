@@ -11,7 +11,7 @@
     <van-pull-refresh v-model="downLoading" @refresh="onRefresh" :success-text="successtext">
       <van-list v-model="upLoading" :finished="finished" @load="onLoad">
         <van-cell-group>
-          <van-cell v-for="item in articles" :key="item">
+          <van-cell v-for="item in articles" :key="item.art_id">
             <!-- 放置文章内容 -->
             <!-- 3个图 -->
             <div class="article_item">
@@ -23,7 +23,7 @@
               </div>
               <!-- <div class="img_box">
                 <van-image class="w100" fit="cover" src="https://img.yzcdn.cn/vant/cat.jpeg" />
-              </div> -->
+              </div>-->
               <div class="info_box">
                 <span>你像一阵风</span>
                 <span>8评论</span>
@@ -41,6 +41,7 @@
 </template>
 
 <script>
+import { getArticles } from '@/api/articles'
 export default {
   data () {
     return {
@@ -48,13 +49,21 @@ export default {
       downLoading: false, // 控制， 下拉刷新整个页面数据
       upLoading: false, // 控制，表示是否开启了上拉加载 默认值false
       finished: false, // 表示 是否已经完成所有数据的加载
-      articles: []
+      articles: [], // 文章列表
+      timestamp: null // 历史时间戳
+    }
+  },
+  props: {
+    channel_id: {
+      required: true, // 必须传值
+      type: Number // 必须是required的类型
+      //   default: null// 默认值，没传值，就用默认值
     }
   },
   methods: {
     //   onload 自己执行，距离底部300
     // 我们在加载数据的时候，页面必须有滚动条，否则onload不会触发，数据就不会加载
-    onLoad () {
+    async onLoad () {
       // 上拉，刷新数据，添加到页面最下方
       //   console.log('开始加载数据')
       // 下面这么写 依然不能关掉加载状态 为什么 ? 因为关掉之后  检测机制  高度还是不够 还是会开启
@@ -63,16 +72,34 @@ export default {
       //   setTimeout(() => {
       //     this.finished = true // 表示 数据已经全部加载完毕 没有数据了
       //   }, 1000) // 等待一秒 然后关闭加载状态
-      if (this.articles.length > 50) {
-        //   关闭上拉刷新数据
-        this.finished = true
+      //   if (this.articles.length > 50) {
+      //     //   关闭上拉刷新数据
+      //     this.finished = true
+      //   } else {
+      //     const arr = Array.from(Array(15), (value, index) => index + 1)
+      //     //   刷新的数据 追加在后面，
+      //     this.articles.push(...arr)
+      //     //   关掉刷新
+      //     this.upLoading = false
+      //     this.successtext = '刷新成功了哦'
+      //   }
+      // 文章列表数据加载
+      //   时间戳简单判断，历史时间戳为空就给现在的时间戳，
+      const data = await getArticles({
+        //   发送请求，给参数：频道ID，时间戳
+        channel_id: this.channel_id,
+        timestamp: this.timestamp || Date.now()
+      })
+      this.articles.push(data.results) // 文章内容的数据
+      this.upLoading = false // 关闭加载
+      //   将历史时间戳 给timestamp 保存
+      // 判断有历史时间戳
+      if (data.pre_timestamp) {
+        // 如果有历史时间戳 表示 还有数据可以继续进行加载
+        this.timestamp = data.pre_timestamp
       } else {
-        const arr = Array.from(Array(15), (value, index) => index + 1)
-        //   刷新的数据 追加在后面，
-        this.articles.push(...arr)
-        //   关掉刷新
-        this.upLoading = false
-        this.successtext = '刷新成功了哦'
+        // 表示没有数据可以请求了
+        this.finished = true
       }
     },
     onRefresh () {
