@@ -11,24 +11,25 @@
     <van-pull-refresh v-model="downLoading" @refresh="onRefresh" :success-text="successtext">
       <van-list v-model="upLoading" :finished="finished" @load="onLoad">
         <van-cell-group>
-          <van-cell v-for="item in articles" :key="item.art_id">
+          <van-cell v-for="item in articles" :key="item.art_id.toString()">
             <!-- 放置文章内容 -->
             <!-- 3个图 -->
             <div class="article_item">
               <h3 class="van-ellipsis">{{item.title}}</h3>
               <div class="img_box" v-if="item.cover.type ===3">
                 <van-image lazy-load class="w33" fit="cover" :src="item.cover.images[0]" />
-                <van-image lazy-load  class="w33" fit="cover" :src="item.cover.images[1]" />
-                <van-image lazy-load  class="w33" fit="cover" :src="item.cover.images[2]" />
+                <van-image lazy-load class="w33" fit="cover" :src="item.cover.images[1]" />
+                <van-image lazy-load class="w33" fit="cover" :src="item.cover.images[2]" />
               </div>
               <div class="img_box" v-if="item.cover.type ===1">
-                <van-image lazy-load  class="w100" fit="cover" :src="item.cover.images[0]" />
+                <van-image lazy-load class="w100" fit="cover" :src="item.cover.images[0]" />
               </div>
               <div class="info_box">
                 <span>{{ item.aut_name }}</span>
                 <span>{{ item.comm_count }}评论</span>
                 <span>{{ item.pubdate | reltime}}</span>
-                <span class="close">
+                <!-- 点击showAction 触发反馈弹层 -->
+                <span @click="$emit('showAction',item.art_id.toString())" class="close" v-if="user.token">
                   <van-icon name="cross"></van-icon>
                 </span>
               </div>
@@ -42,6 +43,7 @@
 
 <script>
 import { getArticles } from '@/api/articles'
+import { mapState } from 'vuex'
 export default {
   data () {
     return {
@@ -52,6 +54,9 @@ export default {
       articles: [], // 文章列表
       timestamp: null // 历史时间戳
     }
+  },
+  computed: {
+    ...mapState(['user'])
   },
   props: {
     channel_id: {
@@ -106,7 +111,7 @@ export default {
     },
     // 下拉刷新--传最新的时间戳  永远拿最新的数据 ，今日头条就这样
     async onRefresh () {
-      await this.$sleep()// 控制，认为控制等待刷新的时间
+      await this.$sleep() // 控制，认为控制等待刷新的时间
       // 下拉刷新整个页面数据
       //   const arr = Array.from(Array(2), (value, index) => '追加' + index)
       //   this.articles.unshift(...arr)

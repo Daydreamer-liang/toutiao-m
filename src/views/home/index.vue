@@ -14,7 +14,8 @@
               </van-cell-group>
         </div>-->
         <!-- 需要将频道ID 传递给ArticleList 列表组件 ，props -->
-        <ArticleList :channel_id="item.id"></ArticleList>
+        <!-- openAction 子组件传递过来的 反馈弹层数据 -->
+        <ArticleList @showAction="openAction" :channel_id="item.id"></ArticleList>
       </van-tab>
     </van-tabs>
     <!-- 在tabs下放置图标  编辑频道的图标 -->
@@ -22,23 +23,40 @@
       <!-- 放入图标 vant图标 -->
       <van-icon name="wap-nav"></van-icon>
     </span>
+    <!-- van-popup反馈弹层 -->
+    <van-popup v-model="showMoreAction" :style="{ width: '80%' }">
+      <moreAction></moreAction>
+    </van-popup>
   </div>
 </template>
 
 <script>
 import ArticleList from './components/article-list'
 import { getMyChannels } from '@/api/channels'
+import moreAction from './components/more-action'
 export default {
   data () {
     return {
-      channels: [] // 频道数据
+      channels: [], // 频道数据
+      showMoreAction: false, // 是否显示反馈弹层
+      articleId: null
     }
   },
 
   components: {
-    ArticleList
+    ArticleList,
+    moreAction
   },
   methods: {
+    //   显示反馈弹层
+    openAction (id) {
+      //   console.log(id)
+
+      this.showMoreAction = true
+      //   把ID存起来
+      this.articleId = id
+    },
+    // 获取频道
     async getMyChannels () {
       const data = await getMyChannels()
       //   console.log(data)
