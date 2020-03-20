@@ -16,7 +16,7 @@ export default {
     // 休眠函数
     Vue.prototype.$sleep = sleep
     // 相对时间-全局过滤器
-    Vue.filter('a', relTime)
+    Vue.filter('reltime', relTime)
     // Vue.filter('relTime', relTime)
   }
 }
