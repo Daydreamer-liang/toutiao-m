@@ -15,23 +15,32 @@ const instance = axios.create({
   baseURL: 'http://ttapi.research.itcast.cn/app/v1_0/',
   //   2.大数字
   //   此函数是后台相应回来的数据 ，但，还没有进入到axios的相应拦截器时 执行 ，数组里可以写多个处理函数
-  transformResquest: [function (data) {
+  transformResponse: [function (data) {
     // data是 后端相应回来的字符串 json.parse()
     // 简单的判断 是否返回有数据
     return data ? JSONBig.parse(data) : {}
   }]
+//   transformResponse: [function (data) {
+//     //   data就是后端响应回来的字符串
+//     // JSON.parse()
+//     return data ? JSONBig.parse(data) : {}
+//   }]
 })
 
 // 2.拦截器 ----------------作用：统一注入token，不用访问每个页面的时候 都获取一次
 // token的注入是在请求之前 ，在请求拦截器
+// instance.interceptors.request.use(function (config) {
 instance.interceptors.request.use(function (config) {
   // 成功的时候 读取配置信息，给配置信息 注入token
   //
-  //   if (store.state.user.token) {
-  // config.headers.Authorization = `Bearer ${store.state.user.token}`
+  if (store.state.user.token) {
+    config.headers.Authorization = `Bearer ${store.state.user.token}`
+  }
   //   注入token
   //   }
-  config.headers.Authorization && (config.headers.Authorization = `Bearer ${store.state.user.token}`)
+  //   config.headers.Authorization && (config.headers.Authorization = `Bearer ${store.state.user.token}`)
+
+  //   config.headers.Authorization && (config.headers.Authorization = `Bearer ${store.state.user.token}`)
   return config // 返回配置
 }, function (error) {
   return Promise.reject(error)// 返回错误 ，会进入到axios的catch里面 被捕获到

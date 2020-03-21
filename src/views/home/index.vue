@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <!-- 放置tabs组件 -->
-    <van-tabs>
+    <van-tabs v-model="articleIndex">
       <!-- 内部需要放置子 标签  title值为当前显示的内容-->
       <!-- van-tab是vant组件的样式  -->
       <!-- <van-tab :title="item.name" v-for="item in channels" :key="item.id"> -->
@@ -25,7 +25,7 @@
     </span>
     <!-- van-popup反馈弹层 -->
     <van-popup v-model="showMoreAction" :style="{ width: '80%' }">
-      <moreAction></moreAction>
+      <moreAction @dislike="dislikeArticle"></moreAction>
     </van-popup>
   </div>
 </template>
@@ -34,12 +34,15 @@
 import ArticleList from './components/article-list'
 import { getMyChannels } from '@/api/channels'
 import moreAction from './components/more-action'
+import { dislikeArticle } from '@/api/articles' // 不感兴趣接口
+import eventbus from '@/utils/eventBus' // 引入广播函数
 export default {
   data () {
     return {
       channels: [], // 频道数据
       showMoreAction: false, // 是否显示反馈弹层
-      articleId: null
+      articleId: null,
+      articleIndex: 0 // 频道ID
     }
   },
 
@@ -59,10 +62,31 @@ export default {
     // 获取频道
     async getMyChannels () {
       const data = await getMyChannels()
-      //   console.log(data)
-
-      //   console.log(data.channels.name)
       this.channels = data.channels
+    },
+    //   反馈弹层-不感兴趣
+    // 对文章不感兴趣
+    async dislikeArticle () {
+      // 调用不感兴趣的文章接口
+      try {
+        await dislikeArticle({
+          target: this.articleId // 不感兴趣的id
+        })
+        // await下方的逻辑 是 resolve(成功)之后 的
+        this.$gnotify({
+          type: 'success',
+          message: '操作成功'
+        })
+        // 传递文字ID ，频道ID，this.channels[this.articleId].id
+        eventbus.$emit('delArticle', this.articleId, this.channels[this.articleIndex].id)
+
+        this.showMoreAction = false // 此时关闭弹层
+      } catch (error) {
+        // 默认是红色
+        this.$gnotify({
+          message: '操作失败'
+        })
+      }
     }
   },
   created () {
