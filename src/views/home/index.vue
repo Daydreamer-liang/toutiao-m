@@ -76,7 +76,7 @@ export default {
     async dislikeOrReport (operateType, type) {
     // async dislikeArticle () {
       // 调用不感兴趣的文章接口
-      console.log(type)
+    //   console.log(type)
 
       try {
         // await dislikeArticle({
