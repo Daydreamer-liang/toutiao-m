@@ -25,7 +25,11 @@
     </span>
     <!-- van-popup反馈弹层 -->
     <van-popup v-model="showMoreAction" :style="{ width: '80%' }">
-      <moreAction @dislike="dislikeArticle"></moreAction>
+      <!-- report举报文字 -->
+      <!-- dislike 不感兴趣/ -->
+      <!-- <moreAction @dislike="dislikeArticle" @report="reportArticle"></moreAction>/ -->
+      <!-- 怎么拿report 参数，$even 是参数 type-->
+      <moreAction @dislike="dislikeOrReport('dislike')" @report="dislikeOrReport('reports',$event)"></moreAction>
     </van-popup>
   </div>
 </template>
@@ -34,7 +38,8 @@
 import ArticleList from './components/article-list'
 import { getMyChannels } from '@/api/channels'
 import moreAction from './components/more-action'
-import { dislikeArticle } from '@/api/articles' // 不感兴趣接口
+import { dislikeArticle, reportArticle } from '@/api/articles' // 不感兴趣接口
+// import { reportArticle } from '@/api/articles' // 举报文章接口
 import eventbus from '@/utils/eventBus' // 引入广播函数
 export default {
   data () {
@@ -66,19 +71,36 @@ export default {
     },
     //   反馈弹层-不感兴趣
     // 对文章不感兴趣
-    async dislikeArticle () {
+    // operateType是辨别用户点击‘不感兴趣’，还是举报文章
+    // type 对应$event  传递过来的参数
+    async dislikeOrReport (operateType, type) {
+    // async dislikeArticle () {
       // 调用不感兴趣的文章接口
+      console.log(type)
+
       try {
-        await dislikeArticle({
-          target: this.articleId // 不感兴趣的id
-        })
+        // await dislikeArticle({
+        //   target: this.articleId // 不感兴趣的id
+        // })
+        operateType === 'dislike'
+          ? await dislikeArticle({
+            target: this.articleId // 不感兴趣的id
+          })
+          : await reportArticle({
+            target: this.articleId, // 不感兴趣的文章id
+            type // 用$even取参数
+          })
         // await下方的逻辑 是 resolve(成功)之后 的
         this.$gnotify({
           type: 'success',
           message: '操作成功'
         })
-        // 传递文字ID ，频道ID，this.channels[this.articleId].id
-        eventbus.$emit('delArticle', this.articleId, this.channels[this.articleIndex].id)
+        // 传递文字ID ，频道ID，this.channels[this.articleId].id--
+        eventbus.$emit(
+          'delArticle',
+          this.articleId,
+          this.channels[this.articleIndex].id
+        )
 
         this.showMoreAction = false // 此时关闭弹层
       } catch (error) {
@@ -86,8 +108,33 @@ export default {
         this.$gnotify({
           message: '操作失败'
         })
+        this.showMoreAction = false // 此时关闭弹层
       }
     }
+    // 举报文章
+    // async reportArticle (type) {
+    //   console.log(type)
+
+    //   try {
+    //     //   举报成功
+    //     await reportArticle({
+    //       target: this.articleId, // 不感兴趣的文章id
+    //       type
+    //     })
+    //     // 传递文字ID ，频道ID，this.channels[this.articleId].id--
+    //     eventbus.$emit(
+    //       'delArticle',
+    //       this.articleId,
+    //       this.channels[this.articleIndex].id
+    //     )
+
+    //     this.showMoreAction = false // 此时关闭弹层
+    //   } catch (error) {
+    //     this.$gnotify({
+    //       message: '操作失败'
+    //     })
+    //   }
+    // }
   },
   created () {
     this.getMyChannels()

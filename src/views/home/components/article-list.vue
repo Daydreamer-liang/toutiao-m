@@ -67,7 +67,7 @@ export default {
           item => item.art_id.toString() === artId
         )
         // 判断是否有id
-        console.log(index)
+        // console.log(index)
 
         if (index > -1) {
           this.articles.splice(index, 1)
