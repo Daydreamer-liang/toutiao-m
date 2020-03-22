@@ -19,7 +19,7 @@
       </van-tab>
     </van-tabs>
     <!-- 在tabs下放置图标  编辑频道的图标 -->
-    <span class="bar_btn">
+    <span class="bar_btn" @click="showChannelEdit=true">
       <!-- 放入图标 vant图标 -->
       <van-icon name="wap-nav"></van-icon>
     </span>
@@ -31,6 +31,10 @@
       <!-- 怎么拿report 参数，$even 是参数 type-->
       <moreAction @dislike="dislikeOrReport('dislike')" @report="dislikeOrReport('reports',$event)"></moreAction>
     </van-popup>
+    <!-- 此时，频道管理 放在弹出面板，不是弹层 -->
+    <van-action-sheet :round="false" title="编辑频道" v-model="showChannelEdit">
+      <ChannelEdit></ChannelEdit>
+    </van-action-sheet>
   </div>
 </template>
 
@@ -41,19 +45,22 @@ import moreAction from './components/more-action'
 import { dislikeArticle, reportArticle } from '@/api/articles' // 不感兴趣接口
 // import { reportArticle } from '@/api/articles' // 举报文章接口
 import eventbus from '@/utils/eventBus' // 引入广播函数
+import ChannelEdit from './components/channel-edit' // 引入频道管理
 export default {
   data () {
     return {
       channels: [], // 频道数据
       showMoreAction: false, // 是否显示反馈弹层
       articleId: null,
-      articleIndex: 0 // 频道ID
+      articleIndex: 0, // 频道ID
+      showChannelEdit: false
     }
   },
 
   components: {
     ArticleList,
-    moreAction
+    moreAction,
+    ChannelEdit
   },
   methods: {
     //   显示反馈弹层
@@ -74,9 +81,9 @@ export default {
     // operateType是辨别用户点击‘不感兴趣’，还是举报文章
     // type 对应$event  传递过来的参数
     async dislikeOrReport (operateType, type) {
-    // async dislikeArticle () {
+      // async dislikeArticle () {
       // 调用不感兴趣的文章接口
-    //   console.log(type)
+      //   console.log(type)
 
       try {
         // await dislikeArticle({
@@ -142,6 +149,17 @@ export default {
 }
 </script>
 <style lang="less" scoped>
+.van-action-sheet {
+  max-height: 100%;
+  height: 100%;
+  .van-action-sheet__header {
+    background: #3296fa;
+    color: #fff;
+    .van-icon-close {
+      color: #fff;
+    }
+  }
+}
 .van-tabs {
   height: 100%;
   display: flex;
