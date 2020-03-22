@@ -14,7 +14,7 @@
           <!-- 第一种 传递ID 去跳转 -->
           <!-- <span @click="$emit('selectChannel',item.id)" class="f12">{{item.name}}</span> -->
           <!-- 第二种  传 索引-->
-          <span @click="$emit('selectChannel',index)" class="f12">{{item.name}}</span>
+          <span @click="$emit('selectChannel',index)" :class="{red:index=== articleIndex}" class="f12">{{item.name}}</span>
           <!-- X号标签 应该点击编辑按钮 才显示 -->
           <van-icon v-if="editing && index>0 " class="btn" name="cross"></van-icon>
         </van-grid-item>
@@ -48,6 +48,11 @@ export default {
       required: true, // 必填
       type: Array, // 类型
       default: () => [] // 默认值： 此函数默认返回空数组，它不让直接写空数组，必须是函数的形式
+    },
+    articleIndex: {
+      required: true, // 必填
+      type: Number, // 类型
+      default: 0 // 默认值： 此函数默认返回空数组，它不让直接写空数组，必须是函数的形式
     }
   },
   methods: {
