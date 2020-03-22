@@ -39,6 +39,7 @@
         :articleIndex="articleIndex"
         @selectChannel="selectChannel"
         :channels="channels"
+        @addChannel="addChannel"
       ></ChannelEdit>
     </van-action-sheet>
   </div>
@@ -46,7 +47,7 @@
 
 <script>
 import ArticleList from './components/article-list'
-import { getMyChannels, delChannels } from '@/api/channels'
+import { getMyChannels, delChannels, addChannels } from '@/api/channels'
 import moreAction from './components/more-action'
 import { dislikeArticle, reportArticle } from '@/api/articles' // 不感兴趣接口
 // import { reportArticle } from '@/api/articles' // 举报文章接口
@@ -69,6 +70,11 @@ export default {
     ChannelEdit
   },
   methods: {
+    // 添加频道
+    async addChannel (channel) {
+      await addChannels(channel)
+      this.channels.push(channel)// 添加到缓存
+    },
     // 频道编辑-删除频道
     async delChannle (id) {
       //   console.log(id)
@@ -77,17 +83,19 @@ export default {
         const index = this.channels.findIndex(item => item.id === id) // 找到对应的索引
         // 找到对应的索引之后
         // 要根据当前删除的索引 和 当前激活的索引的 关系 来 决定 当前激活索引是否需要改变
-        if (index <= this.articleId) {
+        if (index <= this.articleIndex) {
+          console.log(1)
+
           //  如果你删除的索引 是在当前激活索引之前的 或者等于当前激活索引的
           // 此时就要把激活索引 给往前挪一位
-          this.articleId = this.articleId - 1
+          this.articleIndex = this.articleIndex - 1
         }
         this.channels.splice(index, 1) // 删除对应的索引频道
       } catch (error) {
         this.$gnotify({ message: '删除频道失败' })
       }
     },
-    // 这是频道管理 弹出面板传递过来。跳转到相应页面
+    // 这是频道管理 -----弹出面板传递过来。跳转到相应页面
     //   子组件触发selectChannel 方法，会调用selectChannel 方法
     // 第一种 ID
     // selectChannel (id) {

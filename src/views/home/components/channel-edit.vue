@@ -14,9 +14,18 @@
           <!-- 第一种 传递ID 去跳转 -->
           <!-- <span @click="$emit('selectChannel',item.id)" class="f12">{{item.name}}</span> -->
           <!-- 第二种  传 索引-->
-          <span @click="$emit('selectChannel',index)" :class="{red:index=== articleIndex}" class="f12">{{item.name}}</span>
+          <span
+            @click="$emit('selectChannel',index)"
+            :class="{red:index=== articleIndex}"
+            class="f12"
+          >{{item.name}}</span>
           <!-- X号标签 应该点击编辑按钮 才显示 -->
-          <van-icon @click="$emit('delChannle',item.id)" v-if="editing && index>0 " class="btn" name="cross"></van-icon>
+          <van-icon
+            @click="$emit('delChannle',item.id)"
+            v-if="editing && index>0 "
+            class="btn"
+            name="cross"
+          ></van-icon>
         </van-grid-item>
       </van-grid>
     </div>
@@ -26,7 +35,8 @@
       <van-grid class="van-hairline--left">
         <van-grid-item v-for="item in optionalChannels" :key="item.id">
           <span class="f12">{{item.name}}</span>
-          <van-icon class="btn" name="plus"></van-icon>
+          <!-- 添加 传递一个频道对象-->
+          <van-icon @click="$emit('addChannel',item)" class="btn" name="plus"></van-icon>
         </van-grid-item>
       </van-grid>
     </div>
