@@ -39,3 +39,28 @@ export function getAllChannels () {
     url: '/channels'
   })
 }
+
+// 删除频道,id作为删除的依据
+
+export function delChannels (id) {
+  // 频道数据-用户的频道数据
+  return new Promise(function (resolve, reject) {
+    const key = store.state.user.token ? CACHE_CHANNEL_V : CACHE_CHANNEL_T // key根据当前的登录状态来判断
+    const channels = JSON.parse(localStorage.getItem(key))// 直接将数据转换为对象
+    // 直接删除
+    // 第一种
+    // channels = channels.filter(item => item.id !== id)
+    // localStorage.setItem(key, JSON.stringify(channels))
+    // 第二种
+    const index = channels.findIndex(item => item.id === id)
+    //   找到对应的下标 删除
+    if (index > -1) {
+      channels.splice(index, 1)
+      localStorage.setItem(key, JSON.stringify(channels))
+    } else {
+    //   console.log(id)
+
+      reject(new Error('没有此频道'))
+    }
+  })
+}

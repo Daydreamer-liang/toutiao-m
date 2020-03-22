@@ -16,7 +16,7 @@
           <!-- 第二种  传 索引-->
           <span @click="$emit('selectChannel',index)" :class="{red:index=== articleIndex}" class="f12">{{item.name}}</span>
           <!-- X号标签 应该点击编辑按钮 才显示 -->
-          <van-icon v-if="editing && index>0 " class="btn" name="cross"></van-icon>
+          <van-icon @click="$emit('delChannle',item.id)" v-if="editing && index>0 " class="btn" name="cross"></van-icon>
         </van-grid-item>
       </van-grid>
     </div>
