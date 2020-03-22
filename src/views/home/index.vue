@@ -34,7 +34,7 @@
     <!-- 此时，频道管理 放在弹出面板，不是弹层 -->
     <van-action-sheet :round="false" title="编辑频道" v-model="showChannelEdit">
       <!-- channels将父组件频道数据传递给子组件 -->
-      <ChannelEdit :channels="channels"></ChannelEdit>
+      <ChannelEdit @selectChannel="selectChannel" :channels="channels"></ChannelEdit>
     </van-action-sheet>
   </div>
 </template>
@@ -64,6 +64,21 @@ export default {
     ChannelEdit
   },
   methods: {
+    // 这是频道管理 弹出面板传递过来。跳转到相应页面
+    //   子组件触发selectChannel 方法，会调用selectChannel 方法
+    // 第一种 ID
+    // selectChannel (id) {
+    //   //   console.log(id)
+    //   //   找到ID 对应的频道的索引
+    //   const index = this.channels.findIndex(item => item.id === id) // 获取切换频道的索引
+    //   this.articleIndex = index // 将tabs激活标签切换到对应的标签下
+    //   this.showChannelEdit = false // 关闭弹层
+    // },
+    // 第二种 索引
+    selectChannel (index) {
+      this.articleIndex = index // 将tabs激活标签切换到对应的标签下
+      this.showChannelEdit = false // 关闭弹层
+    },
     //   显示反馈弹层
     openAction (id) {
       //   console.log(id)

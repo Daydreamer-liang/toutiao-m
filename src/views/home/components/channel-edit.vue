@@ -10,7 +10,11 @@
       </div>
       <van-grid class="van-hairline--left">
         <van-grid-item v-for="(item,index) in channels" :key="item.id">
-          <span class="f12">{{item.name}}</span>
+          <!-- 当用户点击，就会跳转到相应的频道页面，并关闭频道管理 层 ,-->
+          <!-- 第一种 传递ID 去跳转 -->
+          <!-- <span @click="$emit('selectChannel',item.id)" class="f12">{{item.name}}</span> -->
+          <!-- 第二种  传 索引-->
+          <span @click="$emit('selectChannel',index)" class="f12">{{item.name}}</span>
           <!-- X号标签 应该点击编辑按钮 才显示 -->
           <van-icon v-if="editing && index>0 " class="btn" name="cross"></van-icon>
         </van-grid-item>
@@ -57,7 +61,9 @@ export default {
   computed: {
     //   全部频道-用户频道=可选频道
     optionalChannels () {
-      return this.AllChannels.filter(item => !this.channels.some(o => o.id === item.id))
+      return this.AllChannels.filter(
+        item => !this.channels.some(o => o.id === item.id)
+      )
     }
   },
   created () {
