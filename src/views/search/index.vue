@@ -111,7 +111,7 @@ export default {
     },
     // 联想的点击跳转到结果页面
     toResult (q) {
-      console.log(q)
+    //   console.log(q)
 
       this.historyList.unshift(q) // 将搜索内容加到历史记录
       //   数组去重
