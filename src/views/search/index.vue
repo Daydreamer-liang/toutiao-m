@@ -6,9 +6,12 @@
     <van-search @search="onSearch" v-model.trim="q" placeholder="请输入搜索关键词" shape="round" />
     <!-- 联想内容 -->
     <van-cell-group class="suggest-box" v-if="q">
-      <van-cell icon="search">
-        <span>j</span>ava
-      </van-cell>
+      <van-cell
+        @click="toResult(item)"
+        icon="search"
+        v-for="(item , index) in suggestList"
+        :key="index"
+      >{{item}}</van-cell>
     </van-cell-group>
     <!-- 历史记录 -->
     <div class="history-box" v-else>
@@ -32,13 +35,35 @@
 </template>
 
 <script>
+import { getSuggestion } from '@/api/articles' // 搜索-联想
 const key = 'history' // 把历史记录 储存在本地，而不是后端，这属于垃圾信息，我们不用收集用户信息
 export default {
   name: 'search',
   data () {
     return {
       q: '',
-      historyList: JSON.parse(localStorage.getItem(key) || '[]') // 搜索历史记录
+      historyList: JSON.parse(localStorage.getItem(key) || '[]'), // 搜索历史记录
+      suggestList: [] // 联想的搜索建议
+    }
+  },
+  watch: {
+    //   联想
+    q () {
+      //   1.-------- 防抖
+      clearTimeout(this.timer)
+      //   console.log(this.q)
+      // 需要判断 当清空的时候 不能发送请求 但是要把联想的建议清空
+      this.timer = setTimeout(async () => {
+        if (!this.q) {
+          // 如果这时 搜索关键字没有内容
+          this.suggestList = []
+          // 不能再继续了
+          return
+        }
+        const data = await getSuggestion({ q: this.q })
+        this.suggestList = data.options
+      }, 300)
+      // 2.-------------节流
     }
   },
   methods: {
@@ -70,6 +95,7 @@ export default {
         localStorage.setItem(key, '[]')
       } catch (error) {}
     },
+    // 搜索跳转
     onSearch () {
       //   console.log(1)
       if (!this.q) return
@@ -81,6 +107,20 @@ export default {
         path: '/search/result',
         // query: { q: q }
         query: { q: this.q }
+      })
+    },
+    // 联想的点击跳转到结果页面
+    toResult (q) {
+      console.log(q)
+
+      this.historyList.unshift(q) // 将搜索内容加到历史记录
+      //   数组去重
+      this.historyList = Array.from(new Set(this.historyList)) // 去重
+      localStorage.setItem(key, JSON.stringify(this.historyList)) // 设置本地缓存
+      this.$router.push({
+        path: '/search/result',
+        // query: { q: q }
+        query: { q }
       })
     }
   },
