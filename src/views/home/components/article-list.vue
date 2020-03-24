@@ -11,7 +11,7 @@
     <van-pull-refresh v-model="downLoading" @refresh="onRefresh" :success-text="successtext">
       <van-list v-model="upLoading" :finished="finished" @load="onLoad">
         <van-cell-group>
-          <van-cell v-for="item in articles" :key="item.art_id.toString()">
+          <van-cell :to='`/article?artId=${item.art_id.toString()}`' v-for="item in articles" :key="item.art_id.toString()">
             <!-- 放置文章内容 -->
             <!-- 3个图 -->
             <div class="article_item">
@@ -30,7 +30,7 @@
                 <span>{{ item.pubdate | reltime}}</span>
                 <!-- 点击showAction 触发反馈弹层 -->
                 <span
-                  @click="$emit('showAction',item.art_id.toString())"
+                  @click.stop="$emit('showAction',item.art_id.toString())"
                   class="close"
                   v-if="user.token"
                 >

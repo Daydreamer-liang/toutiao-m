@@ -9,7 +9,7 @@
     <!-- 上拉加载状态、 -->
     <van-list v-model="upLoading" @load="onLoad" :finished="finished">
       <van-cell-group>
-        <van-cell v-for="item in articles" :key="item.aut_id.toString()">
+        <van-cell :to='`/article?artId=${item.aut_id.toString()}`' v-for="item in articles" :key="item.aut_id.toString()">
           <div class="article_item">
             <h3 class="van-ellipsis">{{item.title}}</h3>
             <div class="img_box" v-if="item.cover.type ===3">
