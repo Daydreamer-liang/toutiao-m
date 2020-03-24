@@ -7,7 +7,7 @@
         <van-image round width="1rem" height="1rem" fit="fill" :src="article.aut_photo" />
         <div class="text">
           <p class="name">{{ article.aut_name }}</p>
-          <p class="time">{{ article.pubdate | relTime }}</p>
+          <p class="time">{{ article.pubdate | reltime }}</p>
         </div>
         <van-button
           :loading="followloading"
