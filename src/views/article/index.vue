@@ -9,7 +9,13 @@
           <p class="name">{{ article.aut_name }}</p>
           <p class="time">{{ article.pubdate | relTime }}</p>
         </div>
-        <van-button round size="small" type="info">{{article.is_followed ? '已关注':' + 关注'}}</van-button>
+        <van-button
+          :loading="followloading"
+          @click="follow"
+          round
+          size="small"
+          type="info"
+        >{{article.is_followed ? '已关注':' + 关注'}}</van-button>
       </div>
       <div class="content" v-html="article.content">
         <!-- <p>文章的内容</p> -->
@@ -31,22 +37,54 @@
         >不喜欢</van-button>
       </div>
     </div>
+    <van-overlay :show="loading">
+      <div class="wrapper">
+        <van-loading type="spinner" color="#1989fa" />
+      </div>
+    </van-overlay>
   </div>
 </template>
 
 <script>
 import { getArticleInfo } from '@/api/articles'
+import { followUser, unfollowUser } from '@/api/user'
 export default {
   data () {
     return {
-      article: {} // 文章详情数据
+      article: {}, // 文章详情数据
+      followloading: false, // 按钮加载状态
+      loading: false // 遮罩层
     }
   },
   methods: {
+    //   获取文章详情数据
     async getArticleInfo () {
       // 获取参数
       const { artId } = this.$route.query
       this.article = await getArticleInfo(artId)
+    },
+    // 关注用户
+    async follow () {
+      this.loading = true
+      this.followloading = true
+      // 关注=>  就取消关注
+      // 没关注=>  就关注
+      try {
+        if (this.article.is_followed) {
+          // 当关注的时候，调用取消关注的API ，
+          await unfollowUser(this.article.aut_id)
+        } else {
+          // 当关注的时候，调用取消关注的API ，is_followed
+          await followUser({ target: this.article.aut_id })
+        }
+        this.article.is_followed = !this.article.is_followed
+      } catch (error) {
+        this.$gnotify({ message: '操作失败' })
+      } finally {
+        //   不论成功还是失败 ，你都要来这里
+        this.followloading = false
+        this.loading = false
+      }
     }
   },
   created () {
@@ -56,6 +94,12 @@ export default {
 </script>
 
 <style lang='less' scoped>
+.wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
 .container {
   height: 100%;
   overflow-y: auto;
