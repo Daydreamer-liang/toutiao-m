@@ -30,9 +30,16 @@ export function unfollowUser (autid) {
   })
 }
 
-// 获取用户的个人信息
+// 获取用户的个人信息-粉丝，文章数量，
 export function getUserInfo () {
   return request({
     url: '/user'
+  })
+}
+
+// 获取用户的个人信息-头像，生日，手机号
+export function getUserProfile () {
+  return request({
+    url: '/user/profile'
   })
 }

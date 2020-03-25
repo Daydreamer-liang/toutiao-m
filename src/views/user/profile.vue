@@ -9,13 +9,13 @@
           height="1.5rem"
           fit="cover"
           round
-          src="https://img.yzcdn.cn/vant/cat.jpeg"
+          :src="user.photo"
         />
       </van-cell>
-      <van-cell is-link title="名称" value="用户名称" @click="showName=true" />
+      <van-cell is-link title="名称" :value="user.name" @click="showName=true" />
       <!-- 性别-点击-弹出 -->
-      <van-cell is-link title="性别" value="男" @click="showGender=true" />
-      <van-cell is-link title="生日" value="2019-08-08" />
+      <van-cell is-link title="性别" :value="user.gender === 0 ? '男' : '女'" @click="showGender=true" />
+      <van-cell is-link title="生日" :value="user.birthday" @click="showDate" />
     </van-cell-group>
 
     <!-- 弹层组件 -头像-->
@@ -46,24 +46,28 @@
         type="date"
         :min-date="minDate"
         :max-date="maxDate"
+        @cancel="showBirthDay =false"
+        @confirm="confirmDate"
       />
     </van-popup>
   </div>
 </template>
 
 <script>
+import dayjs from 'dayjs'
+import { getUserProfile } from '@/api/user'
 export default {
   data () {
     return {
       // 控制头像弹出，
       showPhoto: false,
-      //   弹昵称
+      // 弹昵称
       showName: false,
-      //   显示性别
+      // 显示性别
       showGender: false,
-      //   显示性别-中的选项
+      // 显示性别-中的选项
       actions: [{ name: '男' }, { name: '女' }],
-      //   控制生日弹出
+      // 控制生日弹出
       showBirthDay: false,
       // 最小时间
       minDate: new Date(1990, 1, 1),
@@ -71,7 +75,7 @@ export default {
       maxDate: new Date(),
       // 当前时间
       currentDate: new Date(),
-      //   昵称-错误的信息
+      // 昵称-错误的信息
       nameMsg: '',
       // 放置个人资料信息
       user: {
@@ -87,22 +91,49 @@ export default {
     }
   },
   methods: {
-    //   昵称
+    // 昵称
     btnName () {
       // 控制昵称的长度
       if (this.user.name.length < 1 || this.user.name.length > 7) {
-        //   告诉用户 昵称错误
+        // 告诉用户 昵称错误
         this.nameMsg = '用户昵称的长度应该是1-7的长度要求'
         // 不能够再继续
         return
       }
-      //   将错误信息清空、
+      // 将错误信息清空、
       this.nameMsg = ''
-      //   关闭弹窗
+      // 关闭弹窗
       this.showName = false
     },
-    //   性别
-    selectItem () {}
+    // 性别
+    selectItem (item, index) {
+      // index 0 男  1 女
+      this.user.gender = index
+      // 关闭弹层
+      this.showGender = false
+    },
+    // 显示生日弹层
+    showDate () {
+      // 弹出生日
+      this.showBirthDay = true
+      // 设置生日，将字符串格式的生日，转化为date格式的生日，绑定组件 new Date(this.user.birthday)
+      this.currentDate = new Date(this.user.birthday)
+    },
+    // 确认-时间
+    confirmDate () {
+      // 设置生日 将时间date格式 转化为字符串
+      this.user.birthday = dayjs(this.currentDate).format('YYYY-MM-DD')
+      // 关掉
+      this.showBirthDay = false
+    },
+    //   获取用户个人信息
+    async getUserProfile () {
+      this.user = await getUserProfile()
+    }
+  },
+  created () {
+    //   获取用户个人信息
+    this.getUserProfile()
   }
 }
 </script>
