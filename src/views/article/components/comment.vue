@@ -31,12 +31,18 @@
       <!-- 绑定评论的内容 -->
       <van-field v-model="value" placeholder="写评论...">
         <van-loading v-if="submiting" slot="button" type="spinner" size="16px"></van-loading>
-        <span class="submit" v-else slot="button">提交</span>
+        <span class="submit" v-else slot="button" @click="submit">提交</span>
       </van-field>
     </div>
     <!-- 这里是评论别人评论的 弹出面板-->
-    <!-- 回复 -->
-    <van-action-sheet v-model="showReply" :round="false" class="reply_dialog" title="回复评论">
+    <!-- 回复 closed关闭面板时 评论ID 设置为空，目的：判断是通过ID判断是评论内容，还是评论评论-->
+    <van-action-sheet
+      @closed="reply.commentId=null"
+      v-model="showReply"
+      :round="false"
+      class="reply_dialog"
+      title="回复评论"
+    >
       <!-- :immediate-check="false" 关闭第一次 load 执行事件 ，我们自己点击触发 第二次以后 用 @load="getReply"去获取数据 -->
       <van-list
         @load="getReply"
@@ -45,14 +51,12 @@
         :finished="reply.finished"
         finished-text="没有更多了"
       >
-        <div class="item van-hairline--bottom van-hairline--top" v-for="item in reply.list" :key="item.com_id.toString()">
-          <van-image
-            round
-            width="1rem"
-            height="1rem"
-            fit="fill"
-            :src="item.aut_photo"
-          />
+        <div
+          class="item van-hairline--bottom van-hairline--top"
+          v-for="item in reply.list"
+          :key="item.com_id.toString()"
+        >
+          <van-image round width="1rem" height="1rem" fit="fill" :src="item.aut_photo" />
           <div class="info">
             <p>
               <span class="name">{{item.aut_name}}</span>
@@ -71,7 +75,7 @@
 </template>
 
 <script>
-import { getComments } from '@/api/articles' // 获取评论数据
+import { getComments, commentOrReply } from '@/api/articles' // 获取评论数据
 export default {
   data () {
     return {
@@ -167,6 +171,68 @@ export default {
       if (!this.reply.finished) {
         //   表示还有数据没有加载完// finished: false, // 评论的评论是否加载完毕
         this.reply.offset = data.last_id
+      }
+    },
+    // 提交按钮
+    async submit () {
+      //   判断用户是否登录，没登录，不能评论
+      // if(this.$store.state.user.token)
+      if (this.$store.state.user.token) {
+        // 此时。用户登录了，判断用户是否评论内容
+        if (!this.value) return false
+        // 如果用户评论了内容，把提交状态打开，表示用户正在提交内容,避免用户重复提交
+        this.submiting = true
+        // 休眠函数 来控制 执行的速度
+        await this.$sleep(300) // 强制休眠800毫秒
+        try {
+          // 提交内容
+          const data = await commentOrReply({
+            // 评论的目标id（评论文章即为文章id，对评论进行回复则为评论id） this.$toute.query.artId 是文章ID
+            target: this.reply.commentId
+              ? this.reply.commentId
+              : this.$route.query.artId,
+            // 评论内容
+            content: this.value,
+            // 文章id，对评论进行评论时，需要传递此参数，表明所属文章id。对文章进行评论，不要传此参数。
+            art_id: this.reply.commentId ? this.$route.query.artId : null
+          })
+          // 希望调用完成之后 , 添加的评论数据 直接添加到我们的评论列表，判断是评论的哪个
+          if (this.reply.commentId) {
+            //  添加到面板 此时是对评论进行的评论
+            this.reply.list.unshift(data.new_obj)
+            // 此时，有个bug，回复的数量 没有实时更新，找到回复的数量 +1
+            const comment = this.comments.find(
+              item => item.com_id.toString() === this.reply.commentId
+            )
+            // 回复的数量 + 1
+            comment && comment.reply_count++
+          } else {
+            //  添加到面板 此时是对文章进行的评论,加到前面 ,new_obj是这条评论的全部信息
+            this.comments.unshift(data.new_obj)
+          }
+        } catch (error) {
+          this.$gnotify({
+            message: '评论失败'
+          })
+        }
+
+        // 按钮状态关闭
+        this.submiting = false
+        this.value = ''
+      } else {
+        //   用户没有登录，不能评论
+        try {
+          await this.$dialog.confirm({
+            message: '需登录才可评论'
+          })
+          //   如果点击了确定，跳转登录页,并且登录成功，回到原来的页面
+          this.$router.push({
+            path: '/login',
+            query: {
+              redirectUrl: this.$route.fullPath
+            }
+          })
+        } catch (error) {}
       }
     }
   }
