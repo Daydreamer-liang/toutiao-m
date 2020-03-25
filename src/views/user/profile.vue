@@ -10,6 +10,7 @@
           fit="cover"
           round
           :src="user.photo"
+          @click="showPhoto =true"
         />
       </van-cell>
       <van-cell is-link title="名称" :value="user.name" @click="showName=true" />
@@ -23,7 +24,7 @@
       <!-- 内容 -->
       <!-- 1 本地相册选择图片 -->
       <!-- 2 拍照 -->
-      <van-cell is-link title="本地相册选择图片"></van-cell>
+      <van-cell @click="openFileDialog" is-link title="本地相册选择图片"></van-cell>
       <van-cell is-link title="拍照"></van-cell>
     </van-popup>
 
@@ -50,12 +51,14 @@
         @confirm="confirmDate"
       />
     </van-popup>
+    <!-- 上传图片组件 -头像 -->
+    <input @change="upload" type="file" style="display:none" ref="myFile" />
   </div>
 </template>
 
 <script>
 import dayjs from 'dayjs'
-import { getUserProfile } from '@/api/user'
+import { getUserProfile, updatePhoto } from '@/api/user'
 export default {
   data () {
     return {
@@ -129,6 +132,23 @@ export default {
     //   获取用户个人信息
     async getUserProfile () {
       this.user = await getUserProfile()
+    },
+    // 上传图片
+    openFileDialog () {
+      // 触发上传文件的组件
+      this.$refs.myFile.click()
+    },
+    // 修改头像-当点击图片的时候，就会触发change 事件
+    async upload () {
+      //   创建一个 FormData
+      const data = new FormData()
+      // 将图片加入
+      data.append('photo', this.$refs.myFile.files[0])
+      // 点击完头像 就可以上传了
+      const result = await updatePhoto(data)
+      this.user.photo = result.photo
+      // 关闭
+      this.showPhoto = false
     }
   },
   created () {
