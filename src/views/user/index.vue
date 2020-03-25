@@ -3,24 +3,24 @@
     <div class="container">
       <div class="user-profile">
         <div class="info">
-          <van-image round src="https://img.yzcdn.cn/vant/cat.jpeg" />
+          <van-image round :src="userInfo.photo" />
           <h3 class="name">
-            用户名
+            {{userInfo.name}}
             <br />
             <van-tag size="mini">申请认证</van-tag>
           </h3>
         </div>
         <van-row>
           <van-col span="8">
-            <p>0</p>
+            <p>{{userInfo.art_count}}</p>
             <p>动态</p>
           </van-col>
           <van-col span="8">
-            <p>0</p>
+            <p>{{userInfo.follow_count}}</p>
             <p>关注</p>
           </van-col>
           <van-col span="8">
-            <p>0</p>
+            <p>{{userInfo.fans_count}}</p>
             <p>粉丝</p>
           </van-col>
         </van-row>
@@ -41,14 +41,45 @@
         <van-cell icon="edit" title="编辑资料" to="/user/profile" is-link />
         <van-cell icon="chat-o" title="小智同学" to="/user/chat" is-link />
         <van-cell icon="setting-o" title="系统设置" is-link />
-        <van-cell icon="warning-o" title="退出登录" to="/login" is-link />
+        <van-cell icon="warning-o" title="退出登录" @click="logout" is-link />
       </van-cell-group>
     </div>
   </div>
 </template>
 
 <script>
-export default {}
+import { getUserInfo } from '@/api/user'
+import { mapMutations } from 'vuex'
+export default {
+  data () {
+    return {
+      userInfo: []
+    }
+  },
+  methods: {
+    ...mapMutations(['delUser']),
+    //   获取数据，渲染页面
+    async getUserInfo () {
+      // 发送请求 获取数据
+      this.userInfo = await getUserInfo()
+    },
+    // 退出登录
+    async logout () {
+      try {
+        //  确认
+        await this.$dialog.confirm({ message: '确定退出登录吗？' })
+        // 清除token vuex
+        this.delUser()
+        //   跳到登录页
+        //   this.$router.push({ path: '/login' })
+        this.$router.push('login')
+      } catch (error) {}
+    }
+  },
+  created () {
+    this.getUserInfo()
+  }
+}
 </script>
 
 <style lang="less" scoped>
@@ -63,7 +94,7 @@ export default {}
       display: flex;
       padding: 20px;
       align-items: center;
-      .van-image{
+      .van-image {
         width: 64px;
         height: 64px;
       }
@@ -77,7 +108,7 @@ export default {}
         color: #3296fa;
       }
     }
-    p{
+    p {
       margin: 0;
       text-align: center;
     }
