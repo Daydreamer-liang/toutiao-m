@@ -9,7 +9,8 @@ export default new Vuex.Store({
   // 1.state：公共状态
   state: {
     // user对象就是token信息的对象
-    user: auth.getUser()
+    user: auth.getUser(),
+    photo: null // 用户头像
   },
   // 2.mutations：修改公共状态
   mutations: {
@@ -24,6 +25,10 @@ export default new Vuex.Store({
       state.user = {}// 将token 设置为空对象  不可以是null，此时，缓存数据没有变化
       //   删除本地缓存token
       auth.delUser()// 调用删除方法
+    },
+    // 修改用户头像
+    updataPhoto (state, payload) {
+      state.photo = payload.photo
     }
   },
   // 3.actions：给公共状态提供数据支持

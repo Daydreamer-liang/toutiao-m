@@ -57,11 +57,13 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(['delUser']),
+    ...mapMutations(['delUser', 'updataPhoto']),
     //   获取数据，渲染页面
     async getUserInfo () {
       // 发送请求 获取数据
       this.userInfo = await getUserInfo()
+      //   将用户头像共享 -然后在小智语音里更新
+      this.updataPhoto({ photo: this.userInfo.photo })
     },
     // 退出登录
     async logout () {

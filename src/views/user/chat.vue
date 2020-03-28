@@ -1,18 +1,27 @@
 <template>
   <div class="container">
     <van-nav-bar fixed left-arrow @click-left="$router.back()" title="小智同学"></van-nav-bar>
-    <div class="chat-list">
-      <div class="chat-item left">
-        <van-image fit="cover" round src="https://img.yzcdn.cn/vant/cat.jpeg" />
-        <div class="chat-pao">ewqewq</div>
+    <div class="chat-list" ref="myList">
+      <!-- 小智同学 -->
+      <div
+        class="chat-item"
+        :class="{left:item.name==='xz',right:item.name !== 'xz'}"
+        v-for="(item , index ) in list"
+        :key="index"
+      >
+        <van-image v-if="item.name === 'xz'" fit="cover" round :src="XZImg" />
+        <!-- <van-image v-else fit="cover" round :src="this.photo" /> -->
+        <div class="chat-pao">{{item.msg}}</div>
+        <van-image v-if="item.name !== 'xz'" fit="cover" round :src="photo" />
       </div>
-      <div class="chat-item right">
+      <!-- 我说的话 -->
+      <!-- <div class="chat-item right">
         <div class="chat-pao">ewqewq</div>
-        <van-image fit="cover" round src="https://img.yzcdn.cn/vant/cat.jpeg" />
-      </div>
+        <van-image fit="cover" round :src="photo" />
+      </div>-->
     </div>
     <div class="reply-container van-hairline--top">
-      <van-field v-model="value" placeholder="说点什么...">
+      <van-field v-model.trim="value" placeholder="说点什么...">
         <van-loading v-if="loading" slot="button" type="spinner" size="16px"></van-loading>
         <span v-else @click="send()" slot="button" style="font-size:12px;color:#999">提交</span>
       </van-field>
@@ -21,12 +30,79 @@
 </template>
 
 <script>
+import XZImg from '@/assets/xz.gif' // 引入一张图片
+import { mapState } from 'vuex'
+import io from 'socket.io-client' // 小智语音-引入socket.io 客户端
 export default {
   data () {
     return {
-      loading: false,
-      value: ''
+      loading: false, // 控制输入的状态
+      value: '', // 输入的内容
+      list: [], // 用来储存聊天记录
+      XZImg
     }
+  },
+  methods: {
+    //   发送消息
+    send () {
+      //   判断是否有内容
+      if (!this.value) return false
+      //   如果有内容，打开状态.防止重复提交
+      this.loading = true
+      //   调用websocket 发送消息emit('消息类型'，'消息')
+      const obj = {
+        // 消息内容
+        msg: this.value,
+        // 时间戳
+        timestamp: new Date()
+      }
+      //   将消息传给了 服务器
+      this.socket.emit('message', obj)
+      //   将消息追加到页面
+      this.list.push(obj)
+      //   将消息置空
+      this.value = ''
+      //   关闭
+      this.loading = false
+      //   滚动到底部
+      this.scrollBotton()
+    },
+    // 将内容滚动到底部 设置 滚动条的scrollTop(滚动条距离顶部的长度) = scrollHeight(整个容器的实际高度W)
+    scrollBotton () {
+      // 数据渲染是异步，我们等数据加载完-渲染完页面执行  ，$nextTick(),页面加载完毕才执行
+      this.$nextTick(() => {
+        this.$refs.myList.scrollTop = this.$refs.myList.scrollHeight
+      })
+    }
+  },
+  computed: {
+    //   引入xuex的头像  并更新
+    ...mapState(['photo', 'user'])
+  },
+  created () {
+    //   建立socket连接-接口规定-需要token- this.socket这样用可以在别的方法里用
+    this.socket = io('http://ttapi.research.itcast.cn', {
+      query: {
+        token: this.user.token
+      }
+    })
+    this.socket.on('connect', () => {
+      //   console.log(1)
+      // 此时 执行connect事件，表示接通服务器
+      this.list.push({ msg: '你好', name: 'xz' })
+    })
+    // 接收消息
+    this.socket.on('message', data => {
+      console.log(JSON.stringify(data))
+      this.list.push({ ...data, name: 'xz' })
+      //   滚动到底部
+      this.scrollBotton()
+    })
+  },
+  //   实例销毁之前
+  beforeDestroy () {
+    //   关闭连接的服务器
+    this.socket.close()
   }
 }
 </script>

@@ -65,6 +65,7 @@
 <script>
 import dayjs from 'dayjs'
 import { getUserProfile, updatePhoto, saveUserInfo } from '@/api/user'
+import { mapMutations } from 'vuex'
 export default {
   data () {
     return {
@@ -100,6 +101,7 @@ export default {
     }
   },
   methods: {
+    ...mapMutations(['updataPhoto']),
     // 昵称
     btnName () {
       // 控制昵称的长度
@@ -152,7 +154,10 @@ export default {
       data.append('photo', this.$refs.myFile.files[0])
       // 点击完头像 就可以上传了
       const result = await updatePhoto(data)
+      //   设置头像
       this.user.photo = result.photo
+      //   设置完头像 也将当前的头像给vuex
+      this.updataPhoto({ photo: result.photo })
       // 关闭
       this.showPhoto = false
     },
