@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <!-- 放置tabs组件 -->
-    <van-tabs v-model="articleIndex">
+    <van-tabs v-model="articleIndex" @change="changeTab">
       <!-- 内部需要放置子 标签  title值为当前显示的内容-->
       <!-- van-tab是vant组件的样式  -->
       <!-- <van-tab :title="item.name" v-for="item in channels" :key="item.id"> -->
@@ -73,7 +73,7 @@ export default {
     // 添加频道
     async addChannel (channel) {
       await addChannels(channel)
-      this.channels.push(channel)// 添加到缓存
+      this.channels.push(channel) // 添加到缓存
     },
     // 频道编辑-删除频道
     async delChannle (id) {
@@ -164,7 +164,7 @@ export default {
         })
         this.showMoreAction = false // 此时关闭弹层
       }
-    }
+    },
     // 举报文章
     // async reportArticle (type) {
     //   console.log(type)
@@ -189,6 +189,12 @@ export default {
     //     })
     //   }
     // }
+    // 组件缓存-对应各自的频道
+    changeTab () {
+      // 切换页签时，要广播一个消息，让对应的页签 去滚动到相应的位置
+      //   把频道内，页签的ID 传递出去
+      eventbus.$emit('changeTab', this.channels[this.articleIndex].id)
+    }
   },
   created () {
     this.getMyChannels()

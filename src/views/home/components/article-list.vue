@@ -3,7 +3,7 @@
   <!-- van-list 可以帮助我们实现上拉加载  需要一些变量 -->
   <!-- 这里放置这个div的目的是 形成滚动条, 因为我们后期要做 阅读记忆 -->
   <!-- 阅读记忆  上次你阅读到哪  回来之后还是哪-->
-  <div class="scroll-wrapper">
+  <div class="scroll-wrapper" @scroll="remember" ref="myScroll">
     <!-- 文章列表 -->
     <!-- van-list组件 如果不加干涉, 初始化完毕 就会检测 自己距离底部的长度,如果超过了限定 ,就会执行 load事件  自动把
        绑定的 loading 变成true
@@ -11,7 +11,11 @@
     <van-pull-refresh v-model="downLoading" @refresh="onRefresh" :success-text="successtext">
       <van-list v-model="upLoading" :finished="finished" @load="onLoad">
         <van-cell-group>
-          <van-cell :to='`/article?artId=${item.art_id.toString()}`' v-for="item in articles" :key="item.art_id.toString()">
+          <van-cell
+            :to="`/article?artId=${item.art_id.toString()}`"
+            v-for="item in articles"
+            :key="item.art_id.toString()"
+          >
             <!-- 放置文章内容 -->
             <!-- 3个图 -->
             <div class="article_item">
@@ -57,7 +61,7 @@ export default {
     // delAriticle  => 假如有四个实例  4个函数
     eventBus.$on('delArticle', (artId, channelId) => {
       //   console.log(artId)
-    //   console.log(channelId)
+      //   console.log(channelId)
 
       // 这个位置 每个组件实例都会触发
       // 这里要判断一下 传递过来的频道是否等于 自身的频道
@@ -78,6 +82,20 @@ export default {
         }
       }
     })
+
+    eventBus.$on('changeTab', id => {
+      // id就是当前被激活的页面频道ID
+      if (id === this.channel_id) {
+        //   用nextTick函数，是因为this.$refs.myScroll 得不到数据，因为是异步渲染
+        this.$nextTick(() => {
+          // 当滚动元素存在并且不为0
+          if (this.scrollTop && this.$refs.myScroll) {
+            // 滚动位置加装
+            this.$refs.myScroll.scrollTop = this.scrollTop
+          }
+        })
+      }
+    })
   },
   data () {
     return {
@@ -86,7 +104,8 @@ export default {
       upLoading: false, // 控制，表示是否开启了上拉加载 默认值false
       finished: false, // 表示 是否已经完成所有数据的加载
       articles: [], // 文章列表
-      timestamp: null // 历史时间戳
+      timestamp: null, // 历史时间戳
+      scrollTop: 0 // 滚动的位置
     }
   },
   computed: {
@@ -100,6 +119,16 @@ export default {
     }
   },
   methods: {
+    //   记录滚动的事件
+    remember (event) {
+      // 防抖
+      clearTimeout(this.timer)
+      this.timer = setTimeout(() => {
+        // console.log(event)
+        //   记录滚动位置
+        this.scrollTop = event.target.scrollTop
+      }, 500)
+    },
     //   onload 自己执行，距离底部300
     // 我们在加载数据的时候，页面必须有滚动条，否则onload不会触发，数据就不会加载
     async onLoad () {
@@ -172,6 +201,15 @@ export default {
         //   如果没有数据
         this.successText = '当前已经是最新了'
       }
+    }
+  },
+  //   激活缓存组件
+  activated () {
+    // console.log(1)
+    // 判断数据是都变化了
+    if (this.$refs.myScroll && this.scrollTop) {
+      // 判断是否大于0，并且存在，将div滚动原来的位置
+      this.$refs.myScroll.scrollTop = this.scrollTop
     }
   }
 }
