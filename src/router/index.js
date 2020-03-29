@@ -24,7 +24,11 @@ const routes = [
     children: [
       {
         path: '',
-        component: home// 首页
+        component: home, // 首页
+        meta: {
+          // 缓存组件
+          isAlive: true
+        }
       },
       {
         path: '/question',
